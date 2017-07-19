@@ -30,10 +30,21 @@ while True:
         file.write(write)
         file.close()
     elif output == 'json':
-        file = open("log.json", 'a+')
-        file.seek(0, 0)
-        num = file.readlines().__len__()
+        try:
+            file = open("log.json",'a+')
+            file.seek(0, 0)
+            info = json.load(file)
+            num = len(info["SYSINFO"])
+            file.close()
+            file = open("log.json",'w')
+            print("Appending")
+        except json.decoder.JSONDecodeError:
+            print("New")
+            info={}
+            info["SYSINFO"] = []
+            num = 0
         write={}
+        write['SNAPSHOT'] = num + 1
         write['CPU']=psutil.cpu_percent()
         write['Memory'] = psutil.virtual_memory().used//1024 ** 3
         write['Virtual'] = psutil.swap_memory().used // 1024 ** 3
@@ -46,9 +57,8 @@ while True:
         network['Sent'] = psutil.net_io_counters().bytes_sent // 1024 ** 2
         write['Network'] = network
         write['TIMESTAMP'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        write['SNAPSHOT'] = num + 1
-        json.dump(write, file)
-        file.write("\n")
+        info["SYSINFO"].append(write)
+        json.dump(info, file)
         file.close()
     else:
         print("Unsupported output format!")
