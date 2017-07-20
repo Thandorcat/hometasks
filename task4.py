@@ -12,7 +12,10 @@ while True:
     if output == 'text':
         file = open("log.txt", 'a+')
         file.seek(0, 0)
-        num = file.readlines().__len__()//14
+        num = 0
+        for line in file.readlines():
+            if "SNAPSHOT" in line:
+                num += 1
         write=''
         write += "SNAPSHOT " + str(num+1) + ": " + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + "\n"
         write += "CPU: " + str(psutil.cpu_percent()) + "%" + "\n"
@@ -37,9 +40,7 @@ while True:
             num = len(info["SYSINFO"])
             file.close()
             file = open("log.json",'w')
-            print("Appending")
         except json.decoder.JSONDecodeError:
-            print("New")
             info={}
             info["SYSINFO"] = []
             num = 0
